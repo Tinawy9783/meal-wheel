@@ -14,7 +14,7 @@
   --ink:#1f1f22;
   --sub:#7a7268;
   --line:rgba(31,31,34,.08);
-  --card:rgba(255,255,255,.70);
+  --card:rgba(255,255,255,.65);
   --card-soft:rgba(255,255,255,.60);
   --red:#e8503a;
   --red-dark:#cf3d28;
@@ -34,21 +34,25 @@ body{
     linear-gradient(180deg,#faf7f2 0%,#f4f0e9 100%);
   background-attachment:fixed;
   min-height:100vh;
-  padding:0 16px 32px;
+  padding:0 16px 104px;
   line-height:1.6;
   letter-spacing:.01em;
   position:relative;
   overflow-x:hidden;
 }
 
-/* 四角食物裝飾 */
-.deco{position:absolute;font-size:54px;opacity:.16;z-index:0;pointer-events:none;}
-.deco.d1{top:30px;left:14px;}
-.deco.d2{top:60px;right:16px;}
-.deco.d3{bottom:180px;left:10px;}
-.deco.d4{bottom:140px;right:14px;}
-.deco.d5{top:38%;left:6px;font-size:46px;}
-.deco.d6{top:42%;right:8px;font-size:46px;}
+/* 背景食材／水果／飲品裝飾（錯落分佈，唔對稱） */
+.deco{position:absolute;z-index:0;pointer-events:none;opacity:.14;line-height:1;}
+.deco.d1{top:6%;  left:7%;  font-size:52px;opacity:.14;transform:rotate(-12deg);}
+.deco.d2{top:15%; right:9%; font-size:46px;opacity:.16;transform:rotate(10deg);}
+.deco.d3{top:31%; left:4%;  font-size:58px;opacity:.12;transform:rotate(8deg);}
+.deco.d4{bottom:31%; right:6%;font-size:50px;opacity:.15;transform:rotate(-8deg);}
+.deco.d5{bottom:12%; left:11%;font-size:44px;opacity:.16;transform:rotate(14deg);}
+.deco.d6{top:56%; right:11%;font-size:40px;opacity:.13;transform:rotate(-10deg);}
+.deco.d7{top:23%; left:38%;font-size:36px;opacity:.11;transform:rotate(6deg);}
+.deco.d8{bottom:39%; left:23%;font-size:42px;opacity:.13;transform:rotate(-14deg);}
+.deco.d9{top:71%; left:5%;  font-size:46px;opacity:.12;transform:rotate(10deg);}
+.deco.d10{top:9%; left:55%; font-size:38px;opacity:.12;transform:rotate(-6deg);}
 
 .wrap{max-width:640px;margin:0 auto;position:relative;z-index:1;}
 
@@ -57,6 +61,7 @@ body{
   min-height:100vh;min-height:100dvh;
   display:flex;flex-direction:column;
   padding-top:env(safe-area-inset-top,0);
+  padding-bottom:96px;
 }
 
 /* 標題 */
@@ -94,8 +99,13 @@ h1{font-size:30px;font-weight:800;letter-spacing:.01em;line-height:1.15;}
 .result{font-size:21px;font-weight:800;}
 .result-note{font-size:15px;color:var(--sub);}
 
-/* 按鈕 */
-.btn-row{display:flex;justify-content:center;margin-top:12px;}
+/* 按鈕：固定喺手機底部，捲動都唔移位 */
+.btn-row{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  display:flex;justify-content:center;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));
+  background:linear-gradient(180deg, rgba(247,244,238,0), rgba(247,244,238,.92) 35%);
+}
 .btn{
   border:none;border-radius:22px;padding:15px 30px;font-size:18px;font-weight:700;cursor:pointer;
   transition:all .2s ease;min-width:200px;
@@ -134,7 +144,7 @@ textarea{resize:vertical;}
 
 .list{display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;padding-right:4px;}
 .item{
-  background:rgba(255,255,255,.68);border:1px solid var(--line);
+  background:rgba(255,255,255,.65);border:1px solid var(--line);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-radius:18px;padding:15px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;
 }
@@ -171,12 +181,16 @@ footer{text-align:center;font-size:14px;color:var(--sub);margin-top:28px;}
 </head>
 <body>
 
-<span class="deco d1">🥩</span>
-<span class="deco d2">🍜</span>
-<span class="deco d3">🍅</span>
-<span class="deco d4">🥬</span>
-<span class="deco d5">🍃</span>
-<span class="deco d6">🥟</span>
+<span class="deco d1">🍎</span>
+<span class="deco d2">☕</span>
+<span class="deco d3">🍞</span>
+<span class="deco d4">🍇</span>
+<span class="deco d5">🥤</span>
+<span class="deco d6">🍓</span>
+<span class="deco d7">🍊</span>
+<span class="deco d8">🥨</span>
+<span class="deco d9">🍹</span>
+<span class="deco d10">🍰</span>
 
 <div class="wrap">
 
@@ -282,6 +296,12 @@ if(!data){
     data = JSON.parse(JSON.stringify(defaultData));
   }
 }
+/* 結構防禦：確保每個分組都係 {list:[]}，避免舊資料污染導致報錯 */
+["breakfast",SHARE_MAIN,"tea",DESSERT_KEY].forEach(k=>{
+  if(!data[k] || !Array.isArray(data[k].list)){
+    data[k] = { list: Array.isArray(data[k]) ? data[k] : [] };
+  }
+});
 let rotateDeg = 0;
 
 const $ = id => document.getElementById(id);
@@ -329,7 +349,7 @@ function drawWheel(items){
     const per=360/N;
     items.forEach((it,i)=>{
       const a1=per*i*Math.PI/180, a2=per*(i+1)*Math.PI/180;
-      out+=`<path d="M50,50 L${(50+47*Math.cos(a1)).toFixed(2)},${(50+47*Math.sin(a1)).toFixed(2)} A47,47 0 0,1 ${(50+47*Math.cos(a2)).toFixed(2)},${(50+47*Math.sin(a2)).toFixed(2)} Z" fill="${PALETTE[i%PALETTE.length]}" stroke="#fff" stroke-width="0.8"/>`;
+      out+=`<path d="M50,50 L${(50+47*Math.cos(a1)).toFixed(2)},${(50+47*Math.sin(a1)).toFixed(2)} A47,47 0 0,1 ${(50+47*Math.cos(a2)).toFixed(2)},${(50+47*Math.sin(a2)).toFixed(2)} Z" fill="${PALETTE[i%PALETTE.length]}" fill-opacity="0.65" stroke="#fff" stroke-width="0.8"/>`;
       const deg=per*(i+0.5);
       const rad=deg*Math.PI/180;
       const flip=deg>90&&deg<270;
@@ -427,8 +447,8 @@ function setupManage(){
   });
   $("addBtn").onclick=()=>{
     const name=foodName.value.trim(), note=foodNote.value.trim(), key=sel.value;
-    if(!name){alert("餐名都唔寫，你想轉空氣呀？");return;}
-    data[key].push({name,note}); save(); renderList();
+    if(!name){alert("餐名都唔寫，不如吃空氣？");return;}
+    data[key].list.push({name,note}); save(); renderList();
     foodName.value=""; foodNote.value="";
   };
 }
