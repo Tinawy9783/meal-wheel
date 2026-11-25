@@ -1,149 +1,409 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>餐單抽籤轉盤</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>一日餐單轉盤</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#f3f5f9" />
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+:root{
+  --text:#2b2b2e;
+  --text-sub:#6d6d72;
+  --line:rgba(0,0,0,.07);
+  --glass:rgba(255,255,255,.85);
+  --glass-soft:rgba(255,255,255,.78);
+  --shadow:0 10px 30px rgba(60,70,90,.10);
+  --shadow-small:0 3px 12px rgba(60,70,90,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
 body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang HK","Microsoft JhengHei",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(190,215,255,.40), transparent 30%),
+    radial-gradient(circle at 85% 20%, rgba(255,215,225,.35), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(215,235,255,.45), transparent 35%),
+    linear-gradient(180deg,#f3f5f9 0%,#eef1f6 50%,#fafbfd 100%);
+  background-attachment:fixed;
   min-height:100vh;
-  background:linear-gradient(135deg,#87CEFA,#D8BFD8);
-  padding:24px 16px;
+  padding:24px 14px 48px;
+  line-height:1.55;
+  letter-spacing:.01em;
 }
+.wrap{max-width:680px;margin:0 auto;}
+
 .glass{
-  background:rgba(255,255,255,0.85);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  border-radius:24px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.08);
-  border:1px solid rgba(255,255,255,0.35);
-  padding:28px;
-  margin-bottom:20px;
+  background:var(--glass);
+  backdrop-filter:saturate(170%) blur(22px);
+  -webkit-backdrop-filter:saturate(170%) blur(22px);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:28px;
+  box-shadow:var(--shadow);
 }
-h1{font-size:28px;text-align:center;color:#333;margin-bottom:24px;font-weight:600}
-h2{font-size:22px;color:#444;margin-bottom:16px;font-weight:500}
-p,label{font-size:18px;color:#444;line-height:1.6}
-input,select{
-  width:100%;
-  padding:14px 16px;
-  font-size:18px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,0.12);
-  background:rgba(255,255,255,0.75);
-  margin:10px 0 16px;
-  outline:none;
+
+header{text-align:center;margin-bottom:24px;}
+h1{font-size:32px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px;}
+.sub{font-size:16px;color:var(--text-sub);}
+.clock{
+  display:inline-block;margin-top:14px;
+  background:var(--glass-soft);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);
+  border-radius:999px;padding:7px 16px;font-size:14px;color:var(--text-sub);
 }
-button{
-  width:100%;
-  padding:16px;
-  font-size:20px;
-  font-weight:500;
-  border:none;
-  border-radius:16px;
-  background:rgba(100,149,237,0.85);
-  color:white;
-  cursor:pointer;
-  transition:0.25s ease;
-  margin-top:8px;
+
+.tabs{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:8px;
+  padding:10px;margin-bottom:20px;
 }
-button:hover{background:rgba(70,120,210,0.92)}
-#result{
-  font-size:26px;
-  text-align:center;
-  font-weight:600;
-  color:#222;
-  padding:16px 0;
+.tab-btn{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.6);
+  color:var(--text-sub);
+  border-radius:18px;padding:11px 4px;font-size:14px;font-weight:500;
+  cursor:pointer;transition:all .22s ease;
 }
-.food-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 0;
-  font-size:18px;
-  border-bottom:1px solid rgba(0,0,0,0.06);
+.tab-btn:active{transform:scale(.96);}
+.tab-active{
+  background:rgba(255,255,255,.95);color:var(--text);
+  box-shadow:var(--shadow-small);border-color:rgba(0,0,0,.08);
 }
-.del-btn{
-  width:auto;
-  padding:6px 12px;
-  font-size:16px;
-  background:rgba(220,80,80,0.82);
+
+.panel{padding:24px;margin-bottom:20px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+h2{font-size:22px;font-weight:600;}
+.badge{
+  background:var(--glass-soft);border:1px solid var(--line);
+  border-radius:999px;padding:6px 13px;font-size:13px;color:var(--text-sub);white-space:nowrap;
+}
+.tip{font-size:16px;color:var(--text-sub);margin-bottom:18px;}
+
+.wheel-wrap{display:flex;justify-content:center;margin:22px 0;}
+.wheel-box{position:relative;width:min(300px,82vw);height:min(300px,82vw);}
+.pointer{
+  width:0;height:0;
+  border-left:12px solid transparent;border-right:12px solid transparent;
+  border-top:26px solid #2b2b2e;
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);z-index:20;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));
+}
+#wheel{width:100%;height:100%;transition:transform 3.8s cubic-bezier(.2,.8,.2,1);}
+
+.result-box{
+  background:var(--glass-soft);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--line);border-radius:22px;
+  padding:22px;text-align:center;min-height:100px;
+  display:flex;align-items:center;justify-content:center;
+}
+.result{font-size:20px;font-weight:600;}
+.result-note{font-size:15px;color:var(--text-sub);margin-top:8px;}
+
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:22px;}
+.btn{
+  border:none;border-radius:20px;padding:14px 22px;font-size:16px;font-weight:600;cursor:pointer;
+  transition:all .2s ease;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{
+  background:linear-gradient(180deg,#333336,#1d1d1f);color:#fff;
+  box-shadow:0 8px 22px rgba(0,0,0,.20);
+}
+.btn-secondary{
+  background:rgba(255,255,255,.8);color:var(--text);
+  border:1px solid var(--line);backdrop-filter:blur(12px);
+}
+.lock-tip{text-align:center;font-size:14px;color:var(--text-sub);margin-top:18px;}
+
+.manage{padding:24px;}
+.manage h3{font-size:19px;font-weight:600;margin-bottom:16px;}
+.field{width:100%;}
+input,textarea{
+  background:rgba(255,255,255,.78);border:1px solid var(--line);
+  border-radius:16px;padding:13px 15px;font-size:16px;color:var(--text);
+  font-family:inherit;margin-bottom:12px;
+}
+input:focus,textarea:focus{outline:none;border-color:rgba(10,132,255,.4);background:rgba(255,255,255,.92);}
+textarea{resize:vertical;}
+.add-btn{width:100%;margin-bottom:18px;}
+
+.list{display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;padding-right:4px;}
+.item{
+  background:rgba(255,255,255,.72);border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-radius:18px;padding:14px 15px;display:flex;justify-content:space-between;gap:10px;align-items:center;
+}
+.item .meta{flex:1;min-width:0;}
+.item .name{font-size:16px;font-weight:500;}
+.item .note{font-size:14px;color:var(--text-sub);margin-top:3px;word-break:break-word;}
+.del{border:none;background:transparent;color:#8e8e93;font-size:14px;cursor:pointer;padding:6px 10px;border-radius:10px;}
+.del:active{color:#c93434;background:#fbeaea;}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.08),transparent);margin:20px 0;}
+.rules{font-size:14px;color:var(--text-sub);}
+.rules b{color:var(--text);}
+.rules ul{list-style:disc inside;margin-top:6px;display:flex;flex-direction:column;gap:5px;}
+
+footer{text-align:center;font-size:13px;color:var(--text-sub);margin-top:28px;}
+
+@keyframes pop{0%{transform:scale(.96);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.pop-in{animation:pop .35s cubic-bezier(.22,1,.36,1) both;}
+
+@media(max-width:560px){
+  h1{font-size:27px;}
+  h2{font-size:19px;}
+  .tabs{grid-template-columns:repeat(3,1fr);}
+  .result{font-size:18px;}
 }
 </style>
 </head>
 <body>
-<div class="glass">
-  <h1>🍽️ 今日食咩好</h1>
-  <div id="result">準備抽選餐點</div>
-  <button onclick="startRoll()">開始抽籤</button>
-</div>
+<div class="wrap">
 
-<div class="glass">
-  <h2>➕ 新增餐點</h2>
-  <label>餐點名稱</label>
-  <input type="text" id="foodName" placeholder="例如：叉蛋飯、魚蛋粉">
-  <button onclick="addFood()">加入清單</button>
-</div>
+  <header>
+    <h1>🍽️ 今日食咩好</h1>
+    <p class="sub">唔使再煩「今餐食乜」，轉一下，個天話你知。</p>
+    <p class="clock" id="clock"></p>
+  </header>
 
-<div class="glass">
-  <h2>📋 我的餐單</h2>
-  <div id="foodList"></div>
+  <nav class="glass tabs" id="tabs"></nav>
+
+  <section class="glass panel">
+    <div class="panel-head">
+      <h2 id="tabTitle">早餐轉盤</h2>
+      <span class="badge" id="timeTag"></span>
+    </div>
+    <p class="tip" id="tabTip"></p>
+
+    <div class="wheel-wrap">
+      <div class="wheel-box">
+        <div class="pointer"></div>
+        <svg id="wheel" viewBox="0 0 100 100"></svg>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <div>
+        <div class="result" id="result">仲未轉，仲未餓住。</div>
+        <div class="result-note" id="resultNote"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="spinBtn">🎡 轉轉轉，今餐食乜？</button>
+      <button class="btn btn-secondary" id="dessertQuickBtn">🍰 順便抽甜品</button>
+    </div>
+    <p class="lock-tip" id="lockTip"></p>
+  </section>
+
+  <section class="glass manage">
+    <h3>📝 餐單管理</h3>
+    <select id="addPeriod" class="field" style="margin-bottom:12px;"></select>
+    <input id="foodName" type="text" placeholder="食物名稱，例如：菠蘿油、叉蛋飯" />
+    <textarea id="foodNote" rows="2" placeholder="備註：走甜、少冰、記得加菜……"></textarea>
+    <button class="btn btn-secondary add-btn" id="addBtn">➕ 加落餐單</button>
+
+    <div class="list" id="listBox"></div>
+
+    <div class="divider"></div>
+    <div class="rules">
+      <b>時間規則</b>
+      <ul>
+        <li>早餐 06:00–10:00</li>
+        <li>午餐 10:01–15:00</li>
+        <li>下午茶 15:01–17:00</li>
+        <li>晚餐 17:01–22:00</li>
+        <li>宵夜 22:01–次日06:00</li>
+        <li>甜品 隨時都得</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>資料只存在你部手機，唔會上傳出去。</footer>
 </div>
 
 <script>
-let foodArr = JSON.parse(localStorage.getItem("foodList")) || [
-  "叉蛋飯","魚蛋粉","燒臘飯","雲吞麵","咖喱飯","海南雞飯","車仔麵"
+const STORE_KEY = "hk_meal_wheel_v3";
+
+const PERIODS = [
+  { key:"breakfast", name:"早餐",   startMin:6*60,    endMin:10*60,  desc:"06:00–10:00" },
+  { key:"lunch",     name:"午餐",   startMin:10*60+1, endMin:15*60,  desc:"10:01–15:00" },
+  { key:"tea",       name:"下午茶", startMin:15*60+1, endMin:17*60,  desc:"15:01–17:00" },
+  { key:"dinner",    name:"晚餐",   startMin:17*60+1, endMin:22*60,  desc:"17:01–22:00" },
+  { key:"supper",    name:"宵夜",   startMin:22*60+1, endMin:6*60,   desc:"22:01–次日06:00", wrap:true },
 ];
-let rolling = false;
-let timer = null;
+const DESSERT_KEY = "dessert";
 
-function render(){
-  const wrap = document.getElementById("foodList");
-  wrap.innerHTML = "";
-  foodArr.forEach((item,idx)=>{
-    wrap.innerHTML += `
-    <div class="food-item">
-      <span>${item}</span>
-      <button class="del-btn" onclick="delFood(${idx})">刪除</button>
-    </div>`
-  })
-  localStorage.setItem("foodList",JSON.stringify(foodArr));
+const defaultData = {
+  breakfast:{ tip:"晨早流流，唔使諗，轉咗先算。", list:[
+    {name:"菠蘿油",note:"配熱奶茶，走甜少少。"},
+    {name:"豬油撈麵",note:"記得叫走韭黃。"},
+    {name:"叉燒包＋豆漿",note:"早餐經典，唔會錯。"},
+    {name:"炒蛋多士",note:"要滑蛋，唔係煎蛋。"} ]},
+  lunch:{ tip:"朝九晚五，食好啲先有力返工。", list:[
+    {name:"叉蛋飯",note:"叉燒要瘦，飯要熱。"},
+    {name:"濃湯豬扒通粉",note:"通粉彈牙，湯底要濃。"},
+    {name:"蠔油牛肉飯",note:"記得加菜，平衡下。"},
+    {name:"海南雞飯",note:"薑蓉同辣椒醬係靈魂。"} ]},
+  tea:{ tip:"三點三，胃話想食嘢。", list:[
+    {name:"西多士",note:"少糖少牛油，當減肥。"},
+    {name:"魚蛋粉",note:"魚蛋彈牙，湯要清。"},
+    {name:"格仔餅",note:"花生醬味，經典中之經典。"},
+    {name:"凍檸茶＋菠蘿包",note:"少冰，唔好太甜。"} ]},
+  dinner:{ tip:"放咗工，對自己好啲。", list:[
+    {name:"避風塘炒蟹",note:"蒜香要夠，可以多一碗飯。"},
+    {name:"豉油皇鵝腸",note:"要爽，唔可以韌。"},
+    {name:"星洲炒米",note:"咖喱味出，少辣更香。"},
+    {name:"三文魚頭煲",note:"湯好正，小心骨。"} ]},
+  supper:{ tip:"夜晚食嘢，唔講營養，講開心。", list:[
+    {name:"辣魚蛋＋豬腸粉",note:"辣醬要夠，芝麻多啲。"},
+    {name:"沙嗲牛肉麵",note:"麵要幼，湯要滾。"},
+    {name:"煎蠔餅",note:"外脆內嫩，配魚露。"},
+    {name:"八爪魚小丸子",note:"沙律醬同照燒汁。"} ]},
+  dessert:{ tip:"飯後甜品，唔係必須，但係快樂。", list:[
+    {name:"楊枝甘露",note:"芒果要甜，西柚唔好太苦。"},
+    {name:"芒果糯米糍",note:"皮要薄，餡要足。"},
+    {name:"芝麻湯圓",note:"熱熱地，最適合凍天。"},
+    {name:"榴槤班戟",note:"鍾意榴槤先好揀。"} ]}
+};
+
+let data = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+if(!data){
+  const old = JSON.parse(localStorage.getItem("hk_meal_wheel_v2") || "null");
+  data = old || JSON.parse(JSON.stringify(defaultData));
+}
+let currentTab = "breakfast";
+let rotateDeg = 0;
+
+const $ = id => document.getElementById(id);
+const wheel=$("wheel"), result=$("result"), resultNote=$("resultNote"), listBox=$("listBox");
+const foodName=$("foodName"), foodNote=$("foodNote"), tabTitle=$("tabTitle"), tabTip=$("tabTip");
+const timeTag=$("timeTag"), lockTip=$("lockTip"), clockEl=$("clock");
+
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+function nowMin(){ const d=new Date(); return d.getHours()*60+d.getMinutes(); }
+function inPeriod(p){ const m=nowMin(); return p.wrap ? (m>=p.startMin||m<p.endMin) : (m>=p.startMin&&m<=p.endMin); }
+function activePeriod(){ return PERIODS.find(inPeriod)||null; }
+function periodName(k){
+  const all=[...PERIODS,{key:DESSERT_KEY,name:"甜品"}];
+  return (all.find(x=>x.key===k)||{}).name || k;
 }
 
-function addFood(){
-  const val = document.getElementById("foodName").value.trim();
-  if(!val) return alert("請輸入餐點名稱");
-  foodArr.push(val);
-  document.getElementById("foodName").value = "";
-  render();
+function renderClock(){
+  const t=new Date().toLocaleTimeString("zh-HK",{hour12:false});
+  const act=activePeriod();
+  clockEl.textContent=`而家時間：${t}　｜　啱食：${act?periodName(act.key):"宵夜"}`;
 }
 
-function delFood(i){
-  foodArr.splice(i,1);
-  render();
+function renderTabs(){
+  const tabs=$("tabs"); tabs.innerHTML="";
+  PERIODS.forEach(p=>{
+    const b=document.createElement("button");
+    b.className="tab-btn"+(p.key===currentTab?" tab-active":"");
+    b.textContent=p.name;
+    b.onclick=()=>{currentTab=p.key;renderAll();};
+    tabs.appendChild(b);
+  });
+  const bd=document.createElement("button");
+  bd.className="tab-btn"+(DESSERT_KEY===currentTab?" tab-active":"");
+  bd.textContent="甜品"; bd.onclick=()=>{currentTab=DESSERT_KEY;renderAll();};
+  tabs.appendChild(bd);
+
+  const sel=$("addPeriod"); sel.innerHTML="";
+  PERIODS.forEach(p=>{const o=document.createElement("option");o.value=p.key;o.textContent=p.name;sel.appendChild(o);});
+  const od=document.createElement("option");od.value=DESSERT_KEY;od.textContent="甜品";sel.appendChild(od);
 }
 
-function startRoll(){
-  if(rolling) return;
-  if(foodArr.length ===0) return alert("餐單空空，先加啲嘢！");
-  rolling = true;
-  const resDom = document.getElementById("result");
-  let speed = 40;
-  let count = 0;
-  timer = setInterval(()=>{
-    const r = Math.floor(Math.random()*foodArr.length);
-    resDom.innerText = foodArr[r];
-    count++;
-    if(count>22){
-      clearInterval(timer);
-      rolling = false;
-    }
-  },speed)
+function renderMain(){
+  const d=data[currentTab];
+  const p=PERIODS.find(x=>x.key===currentTab);
+  tabTitle.textContent=periodName(currentTab)+"轉盤";
+  tabTip.textContent=d.tip;
+  timeTag.textContent=p?p.desc:"隨時都得";
+  result.textContent="仲未轉，仲未餓住。";
+  resultNote.textContent="";
+  drawWheel(wheel,d.list);
+
+  if(currentTab===DESSERT_KEY){
+    lockTip.textContent="🍰 甜品冇時間限制，肥唔係問題，開心先係。";
+  }else if(p&&inPeriod(p)){
+    lockTip.textContent=`✅ 而家正係${periodName(currentTab)}時間，放心轉。`;
+  }else{
+    lockTip.textContent=`⏰ 而家未到${periodName(currentTab)}時間，轉盤暫時休息。`;
+  }
 }
-render();
+
+const COLORS=["#f4f6fa","#eef2f7","#faf3f6","#f0f5ff","#f7f7fa","#f2f8f3"];
+const INK=["#3a3a3c","#3a3a3c","#5a4a58","#2f4a6b","#3a3a3c","#3a3a3c"];
+function drawWheel(svg,list){
+  if(!list.length){
+    svg.innerHTML=`<circle cx="50" cy="50" r="48" fill="#fbfbfd" stroke="#d2d2d7" stroke-width="0.4"/>
+      <text x="50" y="52" text-anchor="middle" font-size="4" fill="#8e8e93">先加幾樣嘢啦</text>`;
+    return;
+  }
+  const per=360/list.length; let out=`<circle cx="50" cy="50" r="48" fill="#fbfbfd" stroke="#d2d2d7" stroke-width="0.4"/>`;
+  list.forEach((it,i)=>{
+    const s=per*i,e=per*(i+1);
+    const a1=s*Math.PI/180,a2=e*Math.PI/180;
+    out+=`<path d="M50,50 L${(50+48*Math.cos(a1)).toFixed(2)},${(50+48*Math.sin(a1)).toFixed(2)} A48,48 0 0,1 ${(50+48*Math.cos(a2)).toFixed(2)},${(50+48*Math.sin(a2)).toFixed(2)} Z" fill="${COLORS[i%COLORS.length]}" stroke="#fff" stroke-width="0.6"/>`;
+    const mid=(s+e)/2,ma=mid*Math.PI/180;
+    const tx=50+32*Math.cos(ma),ty=50+32*Math.sin(ma);
+    out+=`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="3.1" fill="${INK[i%INK.length]}" font-weight="600">${it.name.length>6?it.name.slice(0,6)+"…":it.name}</text>`;
+  });
+  svg.innerHTML=out;
+}
+
+function renderList(){
+  listBox.innerHTML="";
+  const groups=[...PERIODS.map(p=>({key:p.key,name:p.name})),{key:DESSERT_KEY,name:"甜品"}];
+  groups.forEach(g=>{
+    data[g.key].forEach((it,i)=>{
+      const row=document.createElement("div");
+      row.className="item";
+      row.innerHTML=`<div class="meta"><div class="name">${it.name}</div>${it.note?`<div class="note">${it.note}</div>`:""}</div>`;
+      const del=document.createElement("button");
+      del.className="del"; del.textContent="刪除";
+      del.onclick=()=>{data[g.key].splice(i,1);save();renderAll();};
+      row.appendChild(del);
+      listBox.appendChild(row);
+    });
+  });
+  if(!listBox.innerHTML) listBox.innerHTML=`<div class="rules">暫無食物，喺上面新增啦。</div>`;
+}
+
+function spin(target){
+  const list=data[target];
+  if(!list.length){result.textContent="餐單空咗，先加幾樣啦。";resultNote.textContent="";return;}
+  const p=PERIODS.find(x=>x.key===target);
+  if(p&&!inPeriod(p)){result.textContent=`⏰ 而家未到${periodName(target)}時間。`;resultNote.textContent="聽日早啲啦，或者轉去甜品先。";return;}
+  const per=360/list.length, idx=Math.floor(Math.random()*list.length);
+  rotateDeg+=360*(4+Math.random()*3)+(per*idx+per/2);
+  wheel.style.transform=`rotate(${rotateDeg}deg)`;
+  setTimeout(()=>{
+    const pick=list[idx];
+    result.classList.remove("pop-in");void result.offsetWidth;
+    result.textContent=`🎡 今日${periodName(target)}：${pick.name}`;
+    resultNote.textContent=pick.note||"廚師話：隨便啦，都好食。";
+    result.classList.add("pop-in");
+  },3900);
+}
+
+$("spinBtn").onclick=()=>spin(currentTab);
+$("dessertQuickBtn").onclick=()=>{currentTab=DESSERT_KEY;renderAll();setTimeout(()=>spin(DESSERT_KEY),200);};
+$("addBtn").onclick=()=>{
+  const name=foodName.value.trim(), note=foodNote.value.trim(), key=$("addPeriod").value;
+  if(!name){alert("餐名都唔寫，你想轉空氣呀？");return;}
+  data[key].push({name,note}); save(); renderAll();
+  foodName.value=""; foodNote.value="";
+};
+
+function renderAll(){ renderTabs(); renderMain(); renderList(); renderClock(); }
+renderAll();
+setInterval(renderClock,1000);
 </script>
 </body>
 </html>
