@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>餐單轉盤</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f7fa">
+<style>
+:root {
+    --bg-1: #f5f7fa;
+    --bg-2: #eef1f6;
+    --bg-3: #fbfbfd;
+    --text-main: #1d1d1f;
+    --text-sub: #6e6e73;
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.12);
+    --glass-bg: rgba(255, 255, 255, 0.58);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --border: rgba(0, 0, 0, 0.06);
+    --border-strong: rgba(0, 0, 0, 0.1);
+}
+* { -webkit-tap-highlight-color: transparent;box-sizing:border-box;margin:0;padding:0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang HK", sans-serif;
+    color: var(--text-main);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(180, 210, 255, 0.35), transparent 28%),
+      radial-gradient(circle at 88% 12%, rgba(255, 218, 230, 0.30), transparent 30%),
+      radial-gradient(circle at 50% 95%, rgba(210, 230, 255, 0.40), transparent 32%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    letter-spacing: 0.01em;
+    padding:20px 12px;
+}
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid var(--border);
+    border-radius:24px;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.glass-strong {
+    background: var(--glass-bg-strong);
+    backdrop-filter: saturate(180%) blur(28px);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    border: 1px solid var(--border);
+    border-radius:24px;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 10px 30px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+h1 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align:center;
+    font-size:32px;
+    margin-bottom:8px;
+}
+.text-sub { color: var(--text-sub);text-align:center; font-size:14px; }
+.tab-btn {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+    transition: all 0.25s ease;
+    font-weight: 500;
+    border-radius:18px;
+    padding:10px 4px;
+    font-size:13px;
+}
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.75);
+    color: var(--text-main);
+}
+.tab-active {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text-main);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 4px 14px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+.btn-primary {
+    background: linear-gradient(180deg, #2a2a2c 0%, #1d1d1f 100%);
+    color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.12) inset,
+      0 8px 20px rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-weight: 600;
+    border-radius:18px;
+    padding:12px 20px;
+    border:none;
+    font-size:15px;
+}
+.btn-primary:hover {
+    background: linear-gradient(180deg, #343437 0%, #232325 100%);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.14) inset,
+      0 12px 28px rgba(0, 0, 0, 0.22);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    backdrop-filter: blur(14px);
+    transition: background 0.2s ease, border-color 0.2s ease;
+    font-weight: 500;
+    border-radius:18px;
+    padding:12px 16px;
+    border:none;
+    font-size:14px;
+}
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+input, textarea {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    backdrop-filter: blur(12px);
+    transition: border-color 0.2s ease, background 0.2s ease;
+    border-radius:14px;
+    padding:12px 14px;
+    width:100%;
+    font-size:14px;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: rgba(10, 132, 255, 0.35);
+    background: rgba(255, 255, 255, 0.9);
+}
+.wheel-wrap { filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.12));display:flex;justify-content:center;margin:24px 0; }
+#wheel { transition: transform 3.8s cubic-bezier(0.2, 0.8, 0.2, 1);width:min(300px,90vw);height:min(300px,90vw); }
+.pointer {
+    width: 0; height: 0;
+    border-left: 11px solid transparent;
+    border-right: 11px solid transparent;
+    border-top: 24px solid #1d1d1f;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+    position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:20;
+}
+.wheel-container { position:relative;width:min(300px,90vw);height:min(300px,90vw); }
+.result-box {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    border-radius:20px;
+    padding:20px;
+    text-align:center;
+    min-height:96px;
+    display:flex;align-items:center;justify-content:center;
+}
+.item-row {
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    border-radius:14px;
+    padding:12px;
+    display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;
+}
+.tag {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    color: var(--text-sub);
+    border-radius:99px;
+    padding:4px 10px;
+    font-size:12px;
+}
+.divider { height: 1px;background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);margin:20px 0; }
+@keyframes pop {
+    0% { transform: scale(.96); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.pop-in { animation: pop .4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+.grid-tabs { display:grid;grid-template-columns:repeat(6,1fr);gap:6px; }
+.grid-row { display:grid;grid-template-columns:3fr 2fr;gap:16px;max-width:1000px;margin:0 auto; }
+@media(max-width:768px){
+    .grid-row { grid-template-columns:1fr; }
+    h1 { font-size:28px; }
+}
+</style>
+</head>
+<body>
+<div class="max-w-5xl mx-auto">
+<header class="text-center mb-6">
+    <h1>一日餐單轉盤</h1>
+    <p class="text-sub">唔使再問「今餐食乜」，轉一下，個天話你知</p>
+    <p id="clock" class="mt-3 text-xs text-sub tag inline-block px-4 py-1.5 rounded-full"></p>
+</header>
+<div class="glass rounded-3xl p-2 md:p-3 mb-6">
+    <div class="grid-tabs">
+        <button data-tab="breakfast" class="tab-btn tab-active">🌅 早餐</button>
+        <button data-tab="lunch" class="tab-btn">☀️ 午餐</button>
+        <button data-tab="tea" class="tab-btn">🍵 下午茶</button>
+        <button data-tab="dinner" class="tab-btn">🌙 晚餐</button>
+        <button data-tab="snack" class="tab-btn">🍢 宵夜</button>
+        <button data-tab="dessert" class="tab-btn">🍰 甜品</button>
+    </div>
+</div>
+<div class="grid-row">
+<section class="glass-strong rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3">
+        <h2 id="tabTitle" class="text-xl font-semibold">早餐轉盤</h2>
+        <span id="timeTag" class="tag">06:00–10:00</span>
+    </div>
+    <p id="tabTip" class="text-sm text-sub mb-5">晨早流流，唔使諗，轉咗先算。</p>
+    <div class="wheel-wrap">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <svg id="wheel" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="#fbfbfd" stroke="#d2d2d7" stroke-width="0.4"/>
+                <text x="50" y="52" text-anchor="middle" font-size="4" fill="#8e8e93">先加幾樣早餐啦</text>
+            </svg>
+        </div>
+    </div>
+    <div class="result-box rounded-2xl p-5">
+        <div>
+            <div id="result" class="text-lg font-semibold">仲未轉，仲未餓住。</div>
+            <div id="resultNote" class="text-sm text-sub mt-1.5"></div>
+        </div>
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3 justify-center">
+        <button id="spinBtn" class="btn-primary">🎡 轉轉轉，今餐食乜？</button>
+        <button id="dessertQuickBtn" class="btn-secondary">🍰 順便抽甜品</button>
+    </div>
+    <p id="lockTip" class="text-center text-xs text-sub mt-5"></p>
+</section>
+<section class="glass rounded-3xl p-6">
+    <h3 class="text-lg font-semibold mb-4">餐單管理</h3>
+    <div class="space-y-2.5 mb-4">
+        <input id="foodName" type="text" placeholder="例如：菠蘿油、叉蛋飯、凍檸茶"/>
+        <textarea id="foodNote" rows="2" placeholder="備註：走甜、少冰、記得加菜..."></textarea>
+        <button id="addBtn" class="btn-secondary w-full">➕ 加落餐單</button>
+    </div>
+    <div id="listBox" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+    <div class="divider"></div>
+    <div class="text-xs text-sub">
+        <p class="font-medium text-[#3a3a3c] mb-1.5">時間規則</p>
+        <ul class="space-y-1 list-disc list-inside">
+            <li>早餐 06:00–10:00</li>
+            <li>午餐 10:01–15:00</li>
+            <li>下午茶 15:01–17:00</li>
+            <li>晚餐 17:01–22:00</li>
+            <li>宵夜 22:01–06:00</li>
+            <li>甜品 隨時都得</li>
+        </ul>
+    </div>
+</section>
+</div>
+<footer class="text-center text-xs text-sub mt-10">資料只存喺你手機，唔會上傳出去</footer>
+</div>
+<script>
+const STORE_KEY = "hk_meal_wheel_v2";
+const defaultData = {
+breakfast:{title:"早餐轉盤",tip:"晨早流流，唔使諗，轉咗先算。",time:"06:00–10:00",list:[{name:"菠蘿油",note:"配熱奶茶，走甜少少。"},{name:"豬油撈麵",note:"記得叫走韭黃。"},{name:"叉燒包+豆漿",note:"早餐經典，唔會錯。"},{name:"炒蛋多士",note:"要滑蛋，唔係煎蛋。"}]},
+lunch:{title:"午餐轉盤",tip:"朝九晚五，食好啲先有力返工。",time:"10:01–15:00",list:[{name:"叉蛋飯",note:"叉燒要瘦，飯要熱。"},{name:"濃湯豬扒通粉",note:"通粉彈牙，湯底要濃。"},{name:"蠔油牛肉飯",note:"記得加菜，平衡下。"},{name:"海南雞飯",note:"薑蓉同辣椒醬係靈魂。"}]},
+tea:{title:"下午茶轉盤",tip:"三點三，胃話想食嘢。",time:"15:01–17:00",list:[{name:"西多士",note:"少糖少牛油，當減肥。"},{name:"魚蛋粉",note:"魚蛋彈牙，湯要清。"},{name:"格仔餅",note:"花生醬味，經典中之經典。"},{name:"凍檸茶+菠蘿包",note:"少冰，唔好太甜。"}]},
+dinner:{title:"晚餐轉盤",tip:"放咗工，對自己好啲。",time:"17:01–22:00",list:[{name:"避風塘炒蟹",note:"蒜香要夠，可以多一碗飯。"},{name:"豉油皇鵝腸",note:"要爽，唔可以韌。"},{name:"星洲炒米",note:"咖喱味出，少辣更香。"},{name:"三文魚頭煲",note:"湯好正，小心骨。"}]},
+snack:{title:"宵夜轉盤",tip:"夜晚食嘢，唔講營養，講開心。",time:"22:01–06:00",list:[{name:"辣魚蛋+豬腸粉",note:"辣醬要夠，芝麻多啲。"},{name:"沙嗲牛肉麵",note:"麵要幼，湯要滾。"},{name:"煎蠔餅",note:"外脆內嫩，配魚露。"},{name:"八爪魚小丸子",note:"沙律醬同照燒汁。"}]},
+dessert:{title:"甜品轉盤",tip:"飯後甜品，唔係必須，但係快樂。",time:"隨時都得",list:[{name:"楊枝甘露",note:"芒果要甜，西柚唔好太苦。"},{name:"芒果糯米糍",note:"皮要薄，餡要足。"},{name:"芝麻湯圓",note:"熱熱地，最適合凍天。"},{name:"榴槤班戟",note:"鍾意榴槤先好揀。"}]}
+};
+let data = JSON.parse(localStorage.getItem(STORE_KEY)) || defaultData;
+let currentTab = "breakfast";
+let rotateDeg = 0;
+const wheel = document.getElementById("wheel");
+const result = document.getElementById("result");
+const resultNote = document.getElementById("resultNote");
+const listBox = document.getElementById("listBox");
+const foodName = document.getElementById("foodName");
+const foodNote = document.getElementById("foodNote");
+const tabTitle = document.getElementById("tabTitle");
+const tabTip = document.getElementById("tabTip");
+const timeTag = document.getElementById("timeTag");
+const lockTip = document.getElementById("lockTip");
+const clockEl = document.getElementById("clock");
+function save(){localStorage.setItem(STORE_KEY,JSON.stringify(data));}
+function nowPeriod(){
+    const h = new Date().getHours();
+    if(h>=6 && h<=10) return "breakfast";
+    if(h>=10 && h<=15) return "lunch";
+    if(h>=15 && h<=17) return "tea";
+    if(h>=17 && h<=22) return "dinner";
+    return "snack";
+}
+function periodName(p){return {breakfast:"早餐",lunch:"午餐",tea:"下午茶",dinner:"晚餐",snack:"宵夜",dessert:"甜品"}[p];}
+function renderClock(){
+    const t = new Date().toLocaleTimeString("zh-HK",{hour12:false});
+    clockEl.textContent = `而家時間：${t}｜而家適合食：${periodName(nowPeriod())}`;
+}
+function renderTab(){
+    const d = data[currentTab];
+    tabTitle.textContent = d.title;
+    tabTip.textContent = d.tip;
+    timeTag.textContent = d.time;
+    result.textContent = "仲未轉，仲未餓住。";
+    resultNote.textContent = "";
+    renderWheel();
+    renderList();
+    updateLockTip();
+}
+function updateLockTip(){
+    if(currentTab === "dessert"){
+        lockTip.textContent = "🍰 甜品冇時間限制，肥唔係問題，開心先係。";
+    }else if(currentTab === nowPeriod()){
+        lockTip.textContent = `✅ 而家正係${periodName(currentTab)}時間，放心轉。`;
+    }else{
+        lockTip.textContent = `⏰ 而家唔係${periodName(currentTab)}時間，轉盤可以轉，但唔係時機。`;
+    }
+}
+function renderWheel(){
+    const list = data[currentTab].list;
+    if(list.length===0){
+        wheel.innerHTML = `<circle cx="50" cy="50" r="48" fill="#fbfbfd" stroke="#d2d2d7" stroke-width="0.4"/><text x="50" y="52" text-anchor="middle" font-size="4" fill="#8e8e93">先加幾樣嘢啦</text>`;
+        return;
+    }
+    const per = 360 / list.length;
+    const colors = ["#f5f7fa","#eef2f7","#fbf4f7","#f0f5ff","#f7f7fa","#f2f8f2"];
+    const textColors = ["#3a3a3c","#3a3a3c","#5a4a58","#2f4a6b","#3a3a3c","#3a3a3c"];
+    let svg = `<circle cx="50" cy="50" r="48" fill="#fbfbfd" stroke="#d2d2d7" stroke-width="0.4"/>`;
+    list.forEach((it,i)=>{
+        const s = per*i;
+        const e = per*(i+1);
+        const a1 = s*Math.PI/180;
+        const a2 = e*Math.PI/180;
+        const x1 = 50 + 48*Math.cos(a1);
+        const y1 = 50 + 48*Math.sin(a1);
+        const x2 = 50 + 48*Math.cos(a2);
+        const y2 = 50 + 48*Math.sin(a2);
+        svg += `<path d="M50,50 L${x1},${y1} A48,48 0 0,1 ${x2},${y2} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="0.6"/>`;
+        const mid = (s+e)/2;
+        const ma = mid*Math.PI/180;
+        const tx = 50 + 32*Math.cos(ma);
+        const ty = 50 + 32*Math.sin(ma);
+        svg += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="3" fill="${textColors[i%textColors.length]}" font-weight="600">${it.name}</text>`;
+    });
+    wheel.innerHTML = svg;
+}
+function renderList(){
+    listBox.innerHTML = "";
+    data[currentTab].list.forEach((it,i)=>{
+        const div = document.createElement("div");
+        div.className="item-row";
+        div.innerHTML = `<div class="flex-1 min-w-0"><div class="font-medium text-sm">${it.name}</div><div class="text-xs text-sub mt-0.5 break-words">${it.note || "冇備註，咁即係唔該晒。"}</div></div><button data-i="${i}" class="text-xs text-[#8e8e93] hover:text-[#c93434] font-medium">刪除</button>`;
+        listBox.appendChild(div);
+    });
+}
+function spin(targetTab){
+    const list = data[targetTab].list;
+    if(list.length===0){result.textContent="餐單空咗，先加幾樣嘢啦";resultNote.textContent="";return;}
+    const per = 360/list.length;
+    const idx = Math.floor(Math.random()*list.length);
+    rotateDeg += 360*(4+Math.random()*3) + (per*idx + per/2);
+    wheel.style.transform = `rotate(${rotateDeg}deg)`;
+    setTimeout(()=>{
+        const pick = list[idx];
+        result.classList.remove("pop-in");void result.offsetWidth;
+        result.textContent = `🎡 今日${periodName(targetTab)}：${pick.name}`;
+        resultNote.textContent = pick.note || "廚師話：隨便啦，都好食。";
+        result.classList.add("pop-in");
+    },3900);
+}
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+        document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("tab-active"));
+        btn.classList.add("tab-active");
+        currentTab = btn.dataset.tab;
+        renderTab();
+    }
+});
+document.getElementById("spinBtn").onclick = ()=>spin(currentTab);
+document.getElementById("dessertQuickBtn").onclick = ()=>spin("dessert");
+document.getElementById("addBtn").onclick = ()=>{
+    const n = foodName.value.trim();
+    const nt = foodNote.value.trim();
+    if(!n){alert("餐名都唔寫，你想轉空氣呀？");return;}
+    data[currentTab].list.push({name:n,note:nt});
+    save();renderTab();
+    foodName.value="";foodNote.value="";
+};
+listBox.onclick = e=>{
+    if(e.target.tagName==="BUTTON"){
+        const i = Number(e.target.dataset.i);
+        data[currentTab].list.splice(i,1);
+        save();renderTab();
+    }
+};
+renderClock();renderTab();
+setInterval(renderClock,1000);
+</script>
+</body>
+</html>
