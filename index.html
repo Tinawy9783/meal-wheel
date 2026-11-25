@@ -12,7 +12,10 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{
   height:100%;
-  overflow-x:clip;
+  overflow-x:hidden;
+  width:100%;
+  max-width:100%;
+  position:relative;
 }
 body{
   font-family:-apple-system,BlinkMacSystemFont,"PingFang HK","Noto Sans TC",sans-serif;
@@ -20,7 +23,6 @@ body{
   background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,20 C35,15 42,18 40,25 C38,32 30,33 28,26 Z' fill='%23e9e4dd' fill-opacity='0.4'/%3E%3Ccircle cx='90' cy='80' r='12' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3Cpath d='M70,30 L75,45 L65,45 Z' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3C/svg%3E");
   padding:24px 16px 110px;
   min-height:100vh;
-  overflow-x:clip;
 }
 .food-deco{
   position:fixed;
@@ -88,12 +90,21 @@ input,textarea,select{
 .item{background:rgba(255,255,255,0.65);padding:14px;border-radius:16px;display:flex;justify-content:space-between;align-items:center;}
 .item-name{font-size:18px;}
 .del{border:none;background:transparent;color:#c83c3c;font-size:16px;}
-.confetti{
+
+/* 彩帶容器：固定全屏，內部 overflow hidden，彩帶只喺容器內 absolute 定位 */
+.confetti-layer{
   position:fixed;
-  width:10px;height:10px;
-  top:-10px;
-  left:0;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  pointer-events:none;
   z-index:100;
+}
+.confetti{
+  position:absolute;
+  width:10px;height:10px;
+  top:-12px;
   border-radius:2px;
   pointer-events:none;
   will-change:transform;
@@ -101,7 +112,7 @@ input,textarea,select{
 }
 @keyframes fall{
   0%{transform:translateY(0) rotate(0deg);opacity:1;}
-  100%{transform:translateY(100vh) rotate(720deg);opacity:0;}
+  100%{transform:translateY(105vh) rotate(720deg);opacity:0;}
 }
 </style>
 </head>
@@ -146,6 +157,9 @@ input,textarea,select{
 
 <button class="spin-btn" id="spinBtn">轉一轉</button>
 
+<!-- 彩帶專用容器，避免撐大頁面 -->
+<div class="confetti-layer" id="confettiLayer"></div>
+
 <script>
 const STORE_KEY = "meal_wheel_v5";
 const PERIODS = [
@@ -183,6 +197,7 @@ const $ = id=>document.getElementById(id);
 const wheel = $("wheel"), result = $("result"), resultNote = $("resultNote");
 const foodName = $("foodName"), foodNote = $("foodNote"), listBox = $("listBox");
 const addPeriod = $("addPeriod");
+const confettiLayer = $("confettiLayer");
 
 function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes();}
 function activePeriod(){
@@ -278,14 +293,16 @@ $("addBtn").onclick = ()=>{
 }
 function createConfetti(){
   const colors = ['#2b69d8','#f25c5c','#ffd24d','#49c779','#986ade'];
+  const layerWidth = confettiLayer.clientWidth;
   for(let i=0;i<45;i++){
     const c = document.createElement("div");
     c.className="confetti";
-    c.style.transform = `translateX(${Math.random()*90}vw)`;
+    const x = Math.random() * Math.max(0, layerWidth - 10);
+    c.style.left = x + "px";
     c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
     c.style.animationDelay = Math.random()*0.4 + "s";
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),2800);
+    confettiLayer.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
   }
 }
 $("spinBtn").onclick = ()=>{
