@@ -42,13 +42,13 @@ body{
 }
 
 /* 四角食物裝飾 */
-.deco{position:absolute;font-size:34px;opacity:.13;z-index:0;pointer-events:none;}
+.deco{position:absolute;font-size:54px;opacity:.16;z-index:0;pointer-events:none;}
 .deco.d1{top:30px;left:14px;}
 .deco.d2{top:60px;right:16px;}
 .deco.d3{bottom:180px;left:10px;}
 .deco.d4{bottom:140px;right:14px;}
-.deco.d5{top:38%;left:6px;font-size:28px;}
-.deco.d6{top:42%;right:8px;font-size:28px;}
+.deco.d5{top:38%;left:6px;font-size:46px;}
+.deco.d6{top:42%;right:8px;font-size:46px;}
 
 .wrap{max-width:640px;margin:0 auto;position:relative;z-index:1;}
 
@@ -60,14 +60,14 @@ body{
 }
 
 /* 標題 */
-header{text-align:center;margin:14px 0 6px;}
+header{text-align:center;margin:10px 0 4px;}
 h1{font-size:30px;font-weight:800;letter-spacing:.01em;line-height:1.15;}
 .sub{font-size:15px;color:var(--sub);margin-top:4px;}
 .clock{display:block;margin-top:4px;font-size:13px;color:var(--sub);}
 
 /* 轉盤 */
 .wheel-section{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:8px 0;min-height:0;}
-.wheel-wrap{position:relative;width:min(58vw,40vh);height:min(58vw,40vh);}
+.wheel-wrap{position:relative;width:min(76vw,54vh);height:min(76vw,54vh);}
 .pointer{
   width:0;height:0;
   border-left:13px solid transparent;border-right:13px solid transparent;
@@ -154,6 +154,13 @@ footer{text-align:center;font-size:14px;color:var(--sub);margin-top:28px;}
 @keyframes pop{0%{transform:scale(.96);opacity:0;}100%{transform:scale(1);opacity:1;}}
 .pop-in{animation:pop .35s cubic-bezier(.22,1,.36,1) both;}
 
+/* 彩帶特效 */
+.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:50;pointer-events:none;animation:confetti-fall linear forwards;}
+@keyframes confetti-fall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1;}
+  100%{transform:translateY(105vh) rotate(720deg);opacity:.7;}
+}
+
 @media(max-width:560px){
   h1{font-size:27px;}
   .sub{font-size:14px;}
@@ -175,7 +182,6 @@ footer{text-align:center;font-size:14px;color:var(--sub);margin-top:28px;}
 
   <div class="screen">
   <header>
-    <h1>今日食咩好</h1>
     <p class="sub">今日唔使諗，轉盤幫你話事</p>
     <span class="clock" id="clock"></span>
   </header>
@@ -193,7 +199,7 @@ footer{text-align:center;font-size:14px;color:var(--sub);margin-top:28px;}
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-primary" id="spinBtn">立即轉盤</button>
+    <button class="btn btn-primary" id="spinBtn">轉一轉</button>
   </div>
   <p class="lock-tip" id="lockTip"></p>
   </div>
@@ -324,11 +330,14 @@ function drawWheel(items){
     items.forEach((it,i)=>{
       const a1=per*i*Math.PI/180, a2=per*(i+1)*Math.PI/180;
       out+=`<path d="M50,50 L${(50+47*Math.cos(a1)).toFixed(2)},${(50+47*Math.sin(a1)).toFixed(2)} A47,47 0 0,1 ${(50+47*Math.cos(a2)).toFixed(2)},${(50+47*Math.sin(a2)).toFixed(2)} Z" fill="${PALETTE[i%PALETTE.length]}" stroke="#fff" stroke-width="0.8"/>`;
-      const mid=per*(i+0.5)*Math.PI/180;
-      const tx=50+30*Math.cos(mid), ty=50+30*Math.sin(mid);
-      const fs=N<=3?5:N<=6?4:3.3;
-      const label=it.name.length>7?it.name.slice(0,7)+"…":it.name;
-      out+=`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" fill="#2b2b2e" font-weight="700">${esc(label)}</text>`;
+      const deg=per*(i+0.5);
+      const rad=deg*Math.PI/180;
+      const flip=deg>90&&deg<270;
+      const rot=flip?deg+180:deg;
+      const tx=50+28*Math.cos(rad), ty=50+28*Math.sin(rad);
+      const fs=N<=3?4.6:N<=6?3.8:3.2;
+      const label=it.name.length>5?it.name.slice(0,5)+"…":it.name;
+      out+=`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" transform="rotate(${rot.toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)})" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" fill="#2b2b2e" font-weight="700">${esc(label)}</text>`;
     });
   }
   out+=`<circle cx="50" cy="50" r="9" fill="rgba(255,255,255,.85)" stroke="#e6e2da" stroke-width="0.6"/>`;
@@ -361,6 +370,21 @@ function renderList(){
   refreshWheel();
 }
 
+function confetti(){
+  const colors=["#e8503a","#2b69d8","#e3ecd9","#f6ead6","#f3d9d6","#eef0f2","#f7c948"];
+  const total=42;
+  for(let i=0;i<total;i++){
+    const p=document.createElement("div");
+    p.className="confetti";
+    p.style.left=(10+Math.random()*80)+"%";
+    p.style.background=colors[i%colors.length];
+    p.style.animationDelay=(Math.random()*0.25)+"s";
+    p.style.animationDuration=(1.6+Math.random()*1.2)+"s";
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),3400);
+  }
+}
+
 function spin(){
   const {list,pkey}=candidate();
   if(!list.length){
@@ -385,6 +409,7 @@ function spin(){
     resultNote.textContent=pick.note||"廚師話：隨便啦，都好食。";
     result.classList.add("pop-in");
     lockTip.textContent="";
+    confetti();
   },3900);
 }
 
