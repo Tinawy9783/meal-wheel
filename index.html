@@ -16,8 +16,8 @@
   --line:rgba(31,31,34,.08);
   --card:rgba(255,255,255,.65);
   --card-soft:rgba(255,255,255,.60);
-  --red:#e8503a;
-  --red-dark:#cf3d28;
+  --blue:#8ecdf2;
+  --blue-dark:#4aa3e0;
   --shadow:0 12px 34px rgba(90,70,50,.12);
   --shadow-small:0 3px 12px rgba(90,70,50,.08);
 }
@@ -77,9 +77,9 @@ h1{font-size:30px;font-weight:800;letter-spacing:.01em;line-height:1.15;}
 .pointer{
   width:0;height:0;
   border-left:13px solid transparent;border-right:13px solid transparent;
-  border-top:28px solid var(--red);
+  border-top:28px solid var(--blue-dark);
   position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:20;
-  filter:drop-shadow(0 4px 8px rgba(232,80,58,.3));
+  filter:drop-shadow(0 4px 8px rgba(74,163,224,.3));
 }
 #wheel{width:100%;height:100%;transition:transform 3.8s cubic-bezier(.2,.8,.2,1);}
 
@@ -113,8 +113,9 @@ h1{font-size:30px;font-weight:800;letter-spacing:.01em;line-height:1.15;}
 }
 .btn:active{transform:scale(.97);}
 .btn-primary{
-  background:linear-gradient(180deg,#ef5c44,var(--red-dark));color:#fff;
-  box-shadow:0 10px 26px rgba(232,80,58,.32);
+  background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+  color:#12324a;
+  box-shadow:0 10px 26px rgba(74,163,224,.32);
 }
 .btn-secondary{
   background:rgba(255,255,255,.8);color:var(--ink);
@@ -139,7 +140,7 @@ input,textarea,select{
   border-radius:16px;padding:15px 16px;font-size:17px;color:var(--ink);
   font-family:inherit;margin-bottom:12px;width:100%;
 }
-input:focus,textarea:focus,select:focus{outline:none;border-color:rgba(232,80,58,.4);background:rgba(255,255,255,.92);}
+input:focus,textarea:focus,select:focus{outline:none;border-color:rgba(74,163,224,.4);background:rgba(255,255,255,.92);}
 textarea{resize:vertical;}
 .add-btn{width:100%;margin-bottom:18px;}
 
@@ -379,10 +380,10 @@ function renderList(){
     data[g.key].list.forEach((it,i)=>{
       const row=document.createElement("div");
       row.className="item";
-      row.innerHTML=`<div class="meta"><div class="name">【${g.name}】${it.name}</div>${it.note?`<div class="note">${it.note}</div>`:""}</div>`;
+      row.innerHTML=`<div class="meta"><div class="name">【${g.name}】${esc(it.name)}</div>${it.note?`<div class="note">${esc(it.note)}</div>`:""}</div>`;
       const del=document.createElement("button");
       del.className="del"; del.textContent="刪除";
-      del.onclick=()=>{data[g.key].splice(i,1);save();renderList();};
+      del.onclick=()=>{data[g.key].list.splice(i,1);save();renderList();};
       row.appendChild(del);
       listBox.appendChild(row);
     });
@@ -392,7 +393,7 @@ function renderList(){
 }
 
 function confetti(){
-  const colors=["#e8503a","#2b69d8","#e3ecd9","#f6ead6","#f3d9d6","#eef0f2","#f7c948"];
+  const colors=["#8ecdf2","#4aa3e0","#e3ecd9","#f6ead6","#f3d9d6","#eef0f2","#f7c948"];
   const total=42;
   for(let i=0;i<total;i++){
     const p=document.createElement("div");
