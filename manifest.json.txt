@@ -1,0 +1,16 @@
+{
+  "name": "餐單轉盤",
+  "short_name": "餐單轉盤",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#f5f7fa",
+  "description": "iPhone專用PWA餐單轉盤，揀今日食乜",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1046/1046754.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
