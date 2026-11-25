@@ -10,14 +10,17 @@
 <meta name="theme-color" content="#f8f6f2" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+html,body{
+  height:100%;
+  overflow-x:clip;
+}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"PingFang HK","Noto Sans TC",sans-serif;
   background:#f8f6f2;
   background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,20 C35,15 42,18 40,25 C38,32 30,33 28,26 Z' fill='%23e9e4dd' fill-opacity='0.4'/%3E%3Ccircle cx='90' cy='80' r='12' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3Cpath d='M70,30 L75,45 L65,45 Z' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3C/svg%3E");
   padding:24px 16px 110px;
   min-height:100vh;
-  overflow-x:hidden;
+  overflow-x:clip;
 }
 .food-deco{
   position:fixed;
@@ -89,8 +92,11 @@ input,textarea,select{
   position:fixed;
   width:10px;height:10px;
   top:-10px;
+  left:0;
   z-index:100;
   border-radius:2px;
+  pointer-events:none;
+  will-change:transform;
   animation:fall 2.8s linear forwards;
 }
 @keyframes fall{
@@ -275,7 +281,7 @@ function createConfetti(){
   for(let i=0;i<45;i++){
     const c = document.createElement("div");
     c.className="confetti";
-    c.style.left = Math.random()*100 + "%";
+    c.style.transform = `translateX(${Math.random()*90}vw)`;
     c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
     c.style.animationDelay = Math.random()*0.4 + "s";
     document.body.appendChild(c);
