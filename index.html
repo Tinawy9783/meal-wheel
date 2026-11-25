@@ -10,18 +10,14 @@
 <meta name="theme-color" content="#f8f6f2" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{
-  height:100%;
-  overflow-x:hidden;
-  touch-action:pan-y;
-}
+html,body{height:100%;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"PingFang HK","Noto Sans TC",sans-serif;
   background:#f8f6f2;
   background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,20 C35,15 42,18 40,25 C38,32 30,33 28,26 Z' fill='%23e9e4dd' fill-opacity='0.4'/%3E%3Ccircle cx='90' cy='80' r='12' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3Cpath d='M70,30 L75,45 L65,45 Z' fill='%23e9e4dd' fill-opacity='0.35'/%3E%3C/svg%3E");
   padding:24px 16px 110px;
   min-height:100vh;
-  max-width:100vw;
+  overflow-x:hidden;
 }
 .food-deco{
   position:fixed;
@@ -39,31 +35,10 @@ body{
 .deco8{top:72%;right:8px;width:46px;transform:rotate(-10deg);}
 .deco9{bottom:320px;left:30%;width:40px;transform:rotate(7deg);}
 .deco10{bottom:360px;right:30%;width:35px;transform:rotate(-14deg);}
-.wrap{position:relative;z-index:1;max-width:460px;margin:0 auto;}
+.wrap{position:relative;z-index:1;max-width:420px;margin:0 auto;}
 header{text-align:center;margin-bottom:24px;}
 .subtitle{font-size:22px;color:#333;}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;justify-content:center;}
-.tab-btn{
-  border:none;background:rgba(255,255,255,0.65);backdrop-filter:blur(10px);
-  padding:10px 14px;border-radius:999px;font-size:17px;color:#333;
-}
-.tab-active{background:#2b69d8;color:#fff;}
-.wheel-box{
-  position:relative;
-  width:min(94vw,420px);
-  height:min(94vw,420px);
-  margin:20px auto 28px;
-  overflow:hidden;
-}
-.dessert-corner-btn{
-  position:absolute;
-  top:-12px;
-  right:-8px;
-  z-index:12;
-  border:none;background:rgba(255,255,255,0.65);backdrop-filter:blur(10px);
-  padding:8px 12px;border-radius:999px;font-size:16px;color:#333;
-}
-.dessert-corner-btn.active{background:#2b69d8;color:#fff;}
+.wheel-box{position:relative;width:min(86vw,370px);height:min(86vw,370px);margin:20px auto 28px;}
 .pointer{
   width:0;height:0;
   border-left:14px solid transparent;border-right:14px solid transparent;
@@ -71,12 +46,7 @@ header{text-align:center;margin-bottom:24px;}
   position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:10;
   filter:drop-shadow(0 4px 7px rgba(0,0,0,.18));
 }
-#wheel{
-  width:100%;
-  height:100%;
-  transition:transform 3.6s cubic-bezier(.2,0.8,.2,1);
-  transform-origin:center center;
-}
+#wheel{width:100%;height:100%;transition:transform 3.6s cubic-bezier(.2,0.8,.2,1);}
 .result-card{
   background:rgba(255,255,255,0.65);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -95,6 +65,12 @@ header{text-align:center;margin-bottom:24px;}
   transition:0.2s;cursor:pointer;
 }
 .spin-btn:active{transform:scale(0.97);box-shadow:0 4px 10px rgba(43,105,216,0.2);}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;justify-content:center;}
+.tab-btn{
+  border:none;background:rgba(255,255,255,0.65);backdrop-filter:blur(10px);
+  padding:10px 14px;border-radius:999px;font-size:17px;color:#333;
+}
+.tab-active{background:#2b69d8;color:#fff;}
 .manage{
   background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);
   border-radius:24px;padding:22px;margin-top:24px;border:1px solid rgba(255,255,255,0.85);
@@ -143,7 +119,6 @@ input,textarea,select{
   <div class="tabs" id="tabs"></div>
 
   <div class="wheel-box">
-    <button class="dessert-corner-btn" id="dessertCornerBtn">甜品</button>
     <div class="pointer"></div>
     <svg id="wheel" viewBox="0 0 100 100"></svg>
   </div>
@@ -202,7 +177,6 @@ const $ = id=>document.getElementById(id);
 const wheel = $("wheel"), result = $("result"), resultNote = $("resultNote");
 const foodName = $("foodName"), foodNote = $("foodNote"), listBox = $("listBox");
 const addPeriod = $("addPeriod");
-const dessertCornerBtn = $("dessertCornerBtn");
 
 function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes();}
 function activePeriod(){
@@ -223,6 +197,12 @@ function renderTabs(){
     b.onclick = ()=>{currentTab=p.key;renderAll();};
     tabs.appendChild(b);
   })
+  const bd = document.createElement("button");
+  bd.className = "tab-btn"+(DESSERT_KEY===currentTab?" tab-active":"");
+  bd.textContent = "甜品";
+  bd.onclick = ()=>{currentTab=DESSERT_KEY;renderAll();};
+  tabs.appendChild(bd);
+
   addPeriod.innerHTML = "";
   const optList = [
     {key:"breakfast",name:"早餐"},
@@ -259,7 +239,6 @@ function drawWheel(svg,list){
 }
 function renderAll(){
   renderTabs();
-  dessertCornerBtn.className = currentTab === DESSERT_KEY ? "dessert-corner-btn active" : "dessert-corner-btn";
   const dKey = getDataKey(currentTab);
   const list = data[dKey].list;
   drawWheel(wheel,list);
@@ -280,10 +259,6 @@ function renderList(){
     }
     listBox.appendChild(div);
   })
-}
-dessertCornerBtn.onclick = ()=>{
-  currentTab = DESSERT_KEY;
-  renderAll();
 }
 $("addBtn").onclick = ()=>{
   const k = addPeriod.value;
