@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐單抽籤轉盤</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#87CEFA,#D8BFD8);
+  padding:24px 16px;
+}
+.glass{
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border-radius:24px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.08);
+  border:1px solid rgba(255,255,255,0.35);
+  padding:28px;
+  margin-bottom:20px;
+}
+h1{font-size:28px;text-align:center;color:#333;margin-bottom:24px;font-weight:600}
+h2{font-size:22px;color:#444;margin-bottom:16px;font-weight:500}
+p,label{font-size:18px;color:#444;line-height:1.6}
+input,select{
+  width:100%;
+  padding:14px 16px;
+  font-size:18px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,0.12);
+  background:rgba(255,255,255,0.75);
+  margin:10px 0 16px;
+  outline:none;
+}
+button{
+  width:100%;
+  padding:16px;
+  font-size:20px;
+  font-weight:500;
+  border:none;
+  border-radius:16px;
+  background:rgba(100,149,237,0.85);
+  color:white;
+  cursor:pointer;
+  transition:0.25s ease;
+  margin-top:8px;
+}
+button:hover{background:rgba(70,120,210,0.92)}
+#result{
+  font-size:26px;
+  text-align:center;
+  font-weight:600;
+  color:#222;
+  padding:16px 0;
+}
+.food-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  font-size:18px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.del-btn{
+  width:auto;
+  padding:6px 12px;
+  font-size:16px;
+  background:rgba(220,80,80,0.82);
+}
+</style>
+</head>
+<body>
+<div class="glass">
+  <h1>🍽️ 今日食咩好</h1>
+  <div id="result">準備抽選餐點</div>
+  <button onclick="startRoll()">開始抽籤</button>
+</div>
+
+<div class="glass">
+  <h2>➕ 新增餐點</h2>
+  <label>餐點名稱</label>
+  <input type="text" id="foodName" placeholder="例如：叉蛋飯、魚蛋粉">
+  <button onclick="addFood()">加入清單</button>
+</div>
+
+<div class="glass">
+  <h2>📋 我的餐單</h2>
+  <div id="foodList"></div>
+</div>
+
+<script>
+let foodArr = JSON.parse(localStorage.getItem("foodList")) || [
+  "叉蛋飯","魚蛋粉","燒臘飯","雲吞麵","咖喱飯","海南雞飯","車仔麵"
+];
+let rolling = false;
+let timer = null;
+
+function render(){
+  const wrap = document.getElementById("foodList");
+  wrap.innerHTML = "";
+  foodArr.forEach((item,idx)=>{
+    wrap.innerHTML += `
+    <div class="food-item">
+      <span>${item}</span>
+      <button class="del-btn" onclick="delFood(${idx})">刪除</button>
+    </div>`
+  })
+  localStorage.setItem("foodList",JSON.stringify(foodArr));
+}
+
+function addFood(){
+  const val = document.getElementById("foodName").value.trim();
+  if(!val) return alert("請輸入餐點名稱");
+  foodArr.push(val);
+  document.getElementById("foodName").value = "";
+  render();
+}
+
+function delFood(i){
+  foodArr.splice(i,1);
+  render();
+}
+
+function startRoll(){
+  if(rolling) return;
+  if(foodArr.length ===0) return alert("餐單空空，先加啲嘢！");
+  rolling = true;
+  const resDom = document.getElementById("result");
+  let speed = 40;
+  let count = 0;
+  timer = setInterval(()=>{
+    const r = Math.floor(Math.random()*foodArr.length);
+    resDom.innerText = foodArr[r];
+    count++;
+    if(count>22){
+      clearInterval(timer);
+      rolling = false;
+    }
+  },speed)
+}
+render();
+</script>
+</body>
+</html>
