@@ -214,9 +214,8 @@ footer{text-align:center;font-size:13px;color:var(--text-sub);margin-top:28px;}
       <b>時間規則</b>
       <ul>
         <li>早餐 06:00–10:00</li>
-        <li>午餐 10:01–15:00</li>
+        <li>午餐 / 晚餐共用清單｜午餐 10:01–15:00｜晚餐 17:01–22:00</li>
         <li>下午茶 15:01–17:00</li>
-        <li>晚餐 17:01–22:00</li>
         <li>宵夜 22:01–次日06:00</li>
         <li>甜品 隨時都得</li>
       </ul>
@@ -227,16 +226,17 @@ footer{text-align:center;font-size:13px;color:var(--text-sub);margin-top:28px;}
 </div>
 
 <script>
-const STORE_KEY = "hk_meal_wheel_v3";
+const STORE_KEY = "hk_meal_wheel_v4";
 
 const PERIODS = [
   { key:"breakfast", name:"早餐",   startMin:6*60,    endMin:10*60,  desc:"06:00–10:00" },
-  { key:"lunch",     name:"午餐",   startMin:10*60+1, endMin:15*60,  desc:"10:01–15:00" },
+  { key:"lunch",     name:"午餐",   startMin:10*60+1, endMin:15*60,  desc:"10:01–15:00", share:"main" },
   { key:"tea",       name:"下午茶", startMin:15*60+1, endMin:17*60,  desc:"15:01–17:00" },
-  { key:"dinner",    name:"晚餐",   startMin:17*60+1, endMin:22*60,  desc:"17:01–22:00" },
+  { key:"dinner",    name:"晚餐",   startMin:17*60+1, endMin:22*60,  desc:"17:01–22:00", share:"main" },
   { key:"supper",    name:"宵夜",   startMin:22*60+1, endMin:6*60,   desc:"22:01–次日06:00", wrap:true },
 ];
 const DESSERT_KEY = "dessert";
+const SHARE_MAIN = "main";
 
 const defaultData = {
   breakfast:{ tip:"晨早流流，唔使諗，轉咗先算。", list:[
@@ -244,7 +244,7 @@ const defaultData = {
     {name:"豬油撈麵",note:"記得叫走韭黃。"},
     {name:"叉燒包＋豆漿",note:"早餐經典，唔會錯。"},
     {name:"炒蛋多士",note:"要滑蛋，唔係煎蛋。"} ]},
-  lunch:{ tip:"朝九晚五，食好啲先有力返工。", list:[
+  [SHARE_MAIN]:{ tip:"午晚餐共用，鍾意幾時食都得。", list:[
     {name:"叉蛋飯",note:"叉燒要瘦，飯要熱。"},
     {name:"濃湯豬扒通粉",note:"通粉彈牙，湯底要濃。"},
     {name:"蠔油牛肉飯",note:"記得加菜，平衡下。"},
@@ -254,11 +254,6 @@ const defaultData = {
     {name:"魚蛋粉",note:"魚蛋彈牙，湯要清。"},
     {name:"格仔餅",note:"花生醬味，經典中之經典。"},
     {name:"凍檸茶＋菠蘿包",note:"少冰，唔好太甜。"} ]},
-  dinner:{ tip:"放咗工，對自己好啲。", list:[
-    {name:"避風塘炒蟹",note:"蒜香要夠，可以多一碗飯。"},
-    {name:"豉油皇鵝腸",note:"要爽，唔可以韌。"},
-    {name:"星洲炒米",note:"咖喱味出，少辣更香。"},
-    {name:"三文魚頭煲",note:"湯好正，小心骨。"} ]},
   supper:{ tip:"夜晚食嘢，唔講營養，講開心。", list:[
     {name:"辣魚蛋＋豬腸粉",note:"辣醬要夠，芝麻多啲。"},
     {name:"沙嗲牛肉麵",note:"麵要幼，湯要滾。"},
@@ -273,10 +268,21 @@ const defaultData = {
 
 let data = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
 if(!data){
-  const old = JSON.parse(localStorage.getItem("hk_meal_wheel_v2") || "null");
-  data = old || JSON.parse(JSON.stringify(defaultData));
+  const old = JSON.parse(localStorage.getItem("hk_meal_wheel_v3") || "null");
+  if(old){
+    data = structuredClone(defaultData);
+    data.breakfast = old.breakfast ?? defaultData.breakfast;
+    data.tea = old.tea ?? defaultData.tea;
+    data.supper = old.supper ?? defaultData.supper;
+    data.dessert = old.dessert ?? defaultData.dessert;
+    // 舊午餐、晚餐合併入共用清單
+    const mergeList = [...(old.lunch?.list ?? []), ...(old.dinner?.list ?? [])];
+    data[SHARE_MAIN].list = mergeList.length ? mergeList : defaultData[SHARE_MAIN].list;
+  }else{
+    data = JSON.parse(JSON.stringify(defaultData));
+  }
 }
-let currentTab = "breakfast";
+let currentTab = "lunch";
 let rotateDeg = 0;
 
 const $ = id => document.getElementById(id);
@@ -291,6 +297,12 @@ function activePeriod(){ return PERIODS.find(inPeriod)||null; }
 function periodName(k){
   const all=[...PERIODS,{key:DESSERT_KEY,name:"甜品"}];
   return (all.find(x=>x.key===k)||{}).name || k;
+}
+// 獲取當前分組對應嘅數據key
+function getDataKey(tabKey){
+  const p = PERIODS.find(x=>x.key === tabKey);
+  if(p?.share) return p.share;
+  return tabKey;
 }
 
 function renderClock(){
@@ -314,12 +326,22 @@ function renderTabs(){
   tabs.appendChild(bd);
 
   const sel=$("addPeriod"); sel.innerHTML="";
-  PERIODS.forEach(p=>{const o=document.createElement("option");o.value=p.key;o.textContent=p.name;sel.appendChild(o);});
-  const od=document.createElement("option");od.value=DESSERT_KEY;od.textContent="甜品";sel.appendChild(od);
+  const optList = [
+    {key:"breakfast",name:"早餐"},
+    {key:SHARE_MAIN,name:"午餐/晚餐（共用）"},
+    {key:"tea",name:"下午茶"},
+    {key:"supper",name:"宵夜"},
+    {key:DESSERT_KEY,name:"甜品"}
+  ];
+  optList.forEach(o=>{
+    const op=document.createElement("option");
+    op.value=o.key;op.textContent=o.name;sel.appendChild(op);
+  })
 }
 
 function renderMain(){
-  const d=data[currentTab];
+  const dKey = getDataKey(currentTab);
+  const d=data[dKey];
   const p=PERIODS.find(x=>x.key===currentTab);
   tabTitle.textContent=periodName(currentTab)+"轉盤";
   tabTip.textContent=d.tip;
@@ -359,12 +381,18 @@ function drawWheel(svg,list){
 
 function renderList(){
   listBox.innerHTML="";
-  const groups=[...PERIODS.map(p=>({key:p.key,name:p.name})),{key:DESSERT_KEY,name:"甜品"}];
+  const groups=[
+    {key:"breakfast",name:"早餐"},
+    {key:SHARE_MAIN,name:"午餐/晚餐（共用）"},
+    {key:"tea",name:"下午茶"},
+    {key:"supper",name:"宵夜"},
+    {key:DESSERT_KEY,name:"甜品"}
+  ];
   groups.forEach(g=>{
     data[g.key].forEach((it,i)=>{
       const row=document.createElement("div");
       row.className="item";
-      row.innerHTML=`<div class="meta"><div class="name">${it.name}</div>${it.note?`<div class="note">${it.note}</div>`:""}</div>`;
+      row.innerHTML=`<div class="meta"><div class="name">【${g.name}】${it.name}</div>${it.note?`<div class="note">${it.note}</div>`:""}</div>`;
       const del=document.createElement("button");
       del.className="del"; del.textContent="刪除";
       del.onclick=()=>{data[g.key].splice(i,1);save();renderAll();};
@@ -376,7 +404,8 @@ function renderList(){
 }
 
 function spin(target){
-  const list=data[target];
+  const dKey = getDataKey(target);
+  const list=data[dKey].list;
   if(!list.length){result.textContent="餐單空咗，先加幾樣啦。";resultNote.textContent="";return;}
   const p=PERIODS.find(x=>x.key===target);
   if(p&&!inPeriod(p)){result.textContent=`⏰ 而家未到${periodName(target)}時間。`;resultNote.textContent="聽日早啲啦，或者轉去甜品先。";return;}
